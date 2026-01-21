@@ -16,7 +16,7 @@ async def cors_preflight(request: Request,call_next):
         return Response(
             status_code=200,
             headers={
-                "Access-Control-Allow-Origin":"ai-doc-generator-frontend.vercel.app",
+                "Access-Control-Allow-Origin":"ai-doc-generator-frontend-n2q7ehvq4-palak-bishts-projects.vercel.app",
                 "Access-Control-Allow-Methods":"GET,POST,PUT,DELETE,OPTIONS",
                 "Access-Control-Allow-Headers":"Authorization,Content-Type",
             },
@@ -25,7 +25,7 @@ async def cors_preflight(request: Request,call_next):
             
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["ai-doc-generator-frontend.vercel.app","http://localhost:5173"],
+    allow_origins=["ai-doc-generator-frontend-n2q7ehvq4-palak-bishts-projects.vercel.app","http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
