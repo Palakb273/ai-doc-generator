@@ -10,7 +10,7 @@ import os
 load_dotenv()
 
 app=FastAPI(title="AI Document Generator API")
-origins=["https://ai-doc-generator-frontend.vercel.app","https://ai-doc-generator-frontend-n2q7ehvq4-palak-bishts-projects.vercel.app"]
+origins=["https://ai-doc-generator-frontend.vercel.app","https://ai-doc-generator-frontend-cbrgdmqzx-palak-bishts-projects.vercel.app"]
 
             
 app.add_middleware(
