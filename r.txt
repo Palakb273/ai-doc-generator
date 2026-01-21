@@ -4,3 +4,7 @@ python-dotenv
 supabase
 python-docx
 python-pptx
+groq
+pydantic[email]
+email-validator
+
