@@ -10,16 +10,27 @@ import os
 load_dotenv()
 
 app=FastAPI(title="AI Document Generator API")
+@app.middleware("http")
+async def cors_preflight(request: Request,call_next):
+    if request.method=="OPTIONS":
+        return Response(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin":"ai-doc-generator-frontend.vercel.app",
+                "Access-Control-Allow-Methods":"GET,POST,PUT,DELETE,OPTIONS",
+                "Access-Control-Allow-Headers":"Authorization,Content-Type",
+            },
+        )
+    return await call_next(request)
+            
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","ai-doc-generator-frontend.vercel.app"],
+    allow_origins=["ai-doc-generator-frontend.vercel.app","http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.options("/{path:path}")
-async def preflight_handler(path: str, request: Request):
-    return Response(status_code=200)
+
 app.include_router(auth_router)
 app.include_router(config_router)
 app.include_router(ai_router)
