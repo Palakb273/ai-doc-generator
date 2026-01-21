@@ -1,5 +1,6 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI ,Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from auth import router as auth_router
 from config import router as config_router
@@ -7,6 +8,9 @@ from ai import router as ai_router
 from export import router as export_router
 import os
 load_dotenv()
+@app.options("/{path:path}")
+async def preflight_handler(path: str, request: Request):
+    return Response(status_code=200)
 app=FastAPI(title="AI Document Generator API")
 app.add_middleware(
     CORSMiddleware,
