@@ -24,6 +24,16 @@ def create_project(data:CreateProjectRequest, authorization: str | None = Header
         "topic":data.topic
     }).execute()
     return {"project_id":project.data[0]["id"],"message":"Project created successfully"}
+@router.get("/project/{project_id}")
+def get_project(project_id: str, authorization: str | None = Header(None)):
+    user = get_user_from_token(authorization)
+    project = supabase.table("projects") \
+        .select("id, doc_type, topic") \
+        .eq("id", project_id) \
+        .execute()
+    if not project.data:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project.data[0]
 @router.post("/save-word-outline")
 def save_word_outline(data:WordConfigRequest):
     supabase.table("sections") \
