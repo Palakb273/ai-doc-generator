@@ -19,7 +19,6 @@ def get_project_topic(project_id: str) -> str:
 def generate_content(project_id: str):
     topic, doc_type = get_project_topic(project_id)
 
-    # Try sections first (for word docs), then slides (for PPT)
     sections = supabase.table("sections") \
         .select("*") \
         .eq("project_id", project_id) \
@@ -27,7 +26,6 @@ def generate_content(project_id: str):
         .execute()
 
     if not sections.data:
-        # Fallback: try slides table for PPT projects
         sections = supabase.table("slides") \
             .select("*") \
             .eq("project_id", project_id) \
@@ -37,12 +35,10 @@ def generate_content(project_id: str):
     if not sections.data:
         raise HTTPException(status_code=404, detail="No sections or slides found for this project")
 
-    # Clear old generations for this project before creating new ones
     supabase.table("ai_generations") \
         .delete() \
         .eq("project_id", project_id) \
         .execute()
-        #final
 
     results = []
     total_sections = len(sections.data)
@@ -81,11 +77,20 @@ Do NOT repeat the section title. Jump straight into the content."""
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Groq error: {str(e)}")
 
-        supabase.table("ai_generations").insert({
-            "project_id": project_id,
-            "section_id": section['id'],
-            "content": content
-        }).execute()
+        # ── THIS IS THE FIX ───────────────────────────────────────────
+        if doc_type == "pptx":
+            supabase.table("ai_generations").insert({
+                "project_id": project_id,
+                "slide_id": section['id'],    # slides table id
+                "content": content
+            }).execute()
+        else:
+            supabase.table("ai_generations").insert({
+                "project_id": project_id,
+                "section_id": section['id'],  # sections table id
+                "content": content
+            }).execute()
+        # ─────────────────────────────────────────────────────────────
 
         results.append({
             "section_id": section['id'],
@@ -95,6 +100,7 @@ Do NOT repeat the section title. Jump straight into the content."""
 
     return {"message": "AI Generation completed", "generated_sections": results}
 
+
 @router.get("/content/{project_id}")
 def get_ai_content(project_id: str):
     data = supabase.table("ai_generations") \
@@ -102,7 +108,6 @@ def get_ai_content(project_id: str):
         .eq("project_id", project_id) \
         .execute()
 
-    # If no data found via sections join, try slides join
     if not data.data:
         data = supabase.table("ai_generations") \
             .select("*, slides(title)") \
@@ -110,6 +115,7 @@ def get_ai_content(project_id: str):
             .execute()
 
     return {"content": data.data}
+
 
 class RefineRequest(BaseModel):
     project_id: str
